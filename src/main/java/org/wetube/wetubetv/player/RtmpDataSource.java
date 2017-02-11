@@ -38,6 +38,7 @@ public class RtmpDataSource implements UriDataSource {
 
     @Override
     public int read(byte[] buffer, int offset, int readLength) throws IOException {
+        System.out.println("buffer "+buffer.toString()+" | offset "+offset+" | readlength "+readLength);
         return rtmpClient.read(buffer, offset, readLength);
 
     }

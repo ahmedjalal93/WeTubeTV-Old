@@ -9,12 +9,16 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.widget.Toast;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -67,6 +71,43 @@ public class MediaGrabber {
         }
     }
 
+    private static void sendPOST(String POST_URL, String POST_PARAMS) throws IOException {
+        URL obj = new URL(POST_URL);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+
+        // For POST only - START
+        con.setDoOutput(true);
+        OutputStream os = con.getOutputStream();
+        os.write(POST_PARAMS.getBytes());
+        os.flush();
+        os.close();
+        // For POST only - END
+
+        int responseCode = con.getResponseCode();
+        System.out.println("POST Response Code :: " + responseCode);
+
+        if (responseCode == HttpURLConnection.HTTP_OK) { //success
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // print result
+            String fine = response.toString().substring(response.toString().indexOf("|video|") );
+            System.out.println(fine);
+        } else {
+            System.out.println("POST request not worked");
+        }
+    }
+
+
     public static String getSource(String urls, String host) {
         HttpURLConnection urlConnection = null;
         String fine2 = null;
@@ -104,8 +145,10 @@ public class MediaGrabber {
 
             case "thevideo.me":
                 try {
-                    URL url = new URL(urls);
+                    URL url = new URL("https://thevideo.me/embed-"+urls+".html");
+                    System.out.println(url);
                     URLConnection yc = url.openConnection();
+                    yc.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
                     BufferedReader in = new BufferedReader(new InputStreamReader(
                             yc.getInputStream(), "UTF-8"));
                     String inputLine;
@@ -113,10 +156,16 @@ public class MediaGrabber {
                     while ((inputLine = in.readLine()) != null)
                         a.append(inputLine);
                     in.close();
-                    if(a.toString().indexOf("'360p'") > 0) {
-                        String fine = a.toString().substring(a.toString().indexOf("'360p'") + 15);
-                        System.out.println(fine + "    " + fine2);
-                        fine2 = fine.substring(0, fine.indexOf(".mp4") + 4);
+                    if(a.toString().indexOf("360p") > 0) {
+                        String fine = a.toString().substring(a.toString().indexOf("240p")+16);
+                        System.out.println("fine111111"+fine);
+                        Document doc = Jsoup.connect("https://thevideo.me/dljsv/" + urls).get();
+                        String doc1 = doc.toString().substring(0, doc.toString().indexOf("|role|"));
+                        doc1 = doc1.substring(doc1.indexOf("|each|")+6);
+                        fine2 = fine.substring(0,fine.indexOf("\""))+"?direct=false&ua=1&vt="+doc1;
+                        System.out.println("fine222222"+fine2);
+
+                        System.out.println(doc1);
                         if (!fine2.contains("http")) {
                             fine2 = null;
                         }
@@ -136,6 +185,7 @@ public class MediaGrabber {
                 try {
                     URL url = new URL(urls);
                     URLConnection yc = url.openConnection();
+                    yc.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
                     BufferedReader in = new BufferedReader(new InputStreamReader(
                             yc.getInputStream(), "UTF-8"));
                     String inputLine;
@@ -220,6 +270,19 @@ public class MediaGrabber {
                     }
                 }
                 break;
+
+            case "divxme.com":
+                try {
+                    sendPOST(urls, "op=download1&id=d8vllye0vam0&method_free=method_free");
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                }
+                break;
             default:
                 fine2 = null;
                 break;
@@ -250,8 +313,8 @@ public class MediaGrabber {
                     con = new URL(url).openConnection();
                     con.connect();
                     InputStream is = con.getInputStream();
-                    String correctLink = String.valueOf(con.getURL()).replace("http://thevideo.me/", "");
-                    finallink = "http://thevideo.me/embed-" + correctLink + ".html";
+                    String correctLink = String.valueOf(con.getURL()).replace("https://thevideo.me/", "");
+                    finallink = correctLink;
 
                     is.close();
                 } catch (IOException e) {
@@ -299,6 +362,36 @@ public class MediaGrabber {
                 }
                 System.out.println(finallink);
                 break;
+            case "divxme.com":
+                try {
+                    con = new URL(url).openConnection();
+                    con.connect();
+                    InputStream is = con.getInputStream();
+                    String correctLink = String.valueOf(con.getURL()).replace("http://vidtodo.com/", "");
+                    finallink = correctLink;
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(finallink);
+                break;
+            case "openload.co":
+                try {
+                    con = new URL(url).openConnection();
+                    con.connect();
+                    InputStream is = con.getInputStream();
+                    String correctLink = String.valueOf(con.getURL());
+                    finallink = correctLink;
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(finallink);
+
+
+
+
+
             default:
                 return null;
         }

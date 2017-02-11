@@ -129,7 +129,7 @@ public class Movie extends Activity {
                     if (movieLinks.size() < 1) {
                         String movieHost = element.select("tbody > tr > td:eq(2) > span").text();
                         String movieLink = element.select(".movie_version > tbody > tr > td:eq(1) > span > a").attr("href");
-                        String hacklink = MediaGrabber.getLink("http://www.letmewatchthis.one" + movieLink, movieHost);
+                        String hacklink = MediaGrabber.getLink("http://www.letmewatchthis.pl" + movieLink, movieHost);
                         String hack_source = MediaGrabber.getSource(hacklink, movieHost);
                         if (hack_source != null) {
                             System.out.println(hack_source);

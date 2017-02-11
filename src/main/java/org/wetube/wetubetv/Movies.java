@@ -236,7 +236,7 @@ public class Movies extends Activity {
                 moviesThumbs.clear();
                 moviesTitles.clear();
                 moviesLinks.clear();
-                Document doc = Jsoup.connect("http://www.letmewatchthis.one/?" + params[0] + "&page=" + pageNumber).get();
+                Document doc = Jsoup.connect("http://www.letmewatchthis.pl/?" + params[0] + "&page=" + pageNumber).get();
                 Elements elements = doc.select(".index_item > a");
                 Movies.pageCount = doc.select(".paging > a").size();
                 for (Element element : elements) {
